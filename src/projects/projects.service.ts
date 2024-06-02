@@ -6,17 +6,19 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
-import { AddUserToProjectDto } from '../project-user/dto/add-user-to-project.dto';
+import { Audio } from '@app/project/entities/audio';
+import { Track } from '@app/project/entities/track';
+import { AddUserToProjectDto } from './dto/add-user-to-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { ProjectWithOwner } from './entities/project-with-owner.entity';
-import { Project } from './entities/project.entity';
+import { ProjectWithOwner } from '@app/project/entities/project-with-owner.entity';
+import { Project } from '@app/project/entities/project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { User } from '@app/users/entities/user.entity';
 import { DeleteProjectDto } from './dto/delete-project.dto';
 import {
     ProjectUser,
     USER_PROJECT_ROLE,
-} from '@app/project-user/entities/project-user.entity';
+} from '@app/project/entities/project-user.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -25,7 +27,10 @@ export class ProjectsService {
     constructor(
         @InjectRepository(Project)
         private readonly projectRepository: Repository<Project>,
-
+        @InjectRepository(Track)
+        private readonly trackInfoRepository: Repository<Track>,
+        @InjectRepository(Audio)
+        private readonly audioInfoRepository: Repository<Audio>,
         @InjectRepository(ProjectUser)
         private readonly projectUserRepository: Repository<ProjectUser>,
     ) {}
@@ -45,13 +50,13 @@ export class ProjectsService {
 
         const newProject = new Project();
         newProject.name = createProjectDto.name;
+        // newProject.tracks = [];
         const project = await this.projectRepository.save(newProject);
 
         const projectUser = new ProjectUser();
         projectUser.project = project;
         projectUser.user = user;
         projectUser.role = USER_PROJECT_ROLE.owner;
-
         await this.projectUserRepository.save(projectUser);
     }
 
@@ -94,12 +99,19 @@ export class ProjectsService {
     ): Promise<void> {
         const user = new User();
         user.id = userId;
+
         const project = new Project();
         project.id = deleteProjectDto.id;
-        console.log(userId, deleteProjectDto.id);
 
-        await this.projectUserRepository.delete({ user, project });
-        await this.projectRepository.remove(project);
+        // const projectEntity = await this.projectRepository.remove(project);
+        // await this.projectUserRepository.delete({ user, project });
+
+        // const trackInfos = await this.trackInfoRepository.remove(
+        //     projectEntity.tracks,
+        // );
+        // await this.audioInfoRepository.remove(
+        // trackInfos.map((trackInfo) => trackInfo.audios).flat(),
+        // );
     }
 
     public async addUserToProject(

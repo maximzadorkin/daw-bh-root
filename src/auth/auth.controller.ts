@@ -28,6 +28,28 @@ import { SignUpDto } from './dto/sign-up.dto';
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
+    @ApiBadRequestResponse({
+        description: 'Ошибка заполнения',
+    })
+    @ApiOkResponse({ description: 'Пользователь успешно вошел в систему' })
+    @HttpCode(HttpStatus.OK)
+    @Public()
+    @Post('sign-in')
+    private signIn(
+        @Body() signInDto: SignInDto,
+    ): Promise<{ accessToken: string }> {
+        return this.authService.signIn(signInDto);
+    }
+
+    @ApiOkResponse({ description: 'Пользователь успешно вышел из системы' })
+    @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
+    @ApiBearerAuth()
+    @HttpCode(HttpStatus.OK)
+    @Post('sign-out')
+    private signOut(@CurrentUser('id') userId: string): Promise<void> {
+        return this.authService.signOut(userId);
+    }
+
     @ApiConflictResponse({
         description: 'Пользователь уже существует',
     })
@@ -39,28 +61,8 @@ export class AuthController {
     })
     @Public()
     @Post('sign-up')
-    signUp(@Body() signUpDto: SignUpDto): Promise<void> {
+    private signUp(@Body() signUpDto: SignUpDto): Promise<void> {
         return this.authService.signUp(signUpDto);
-    }
-
-    @ApiBadRequestResponse({
-        description: 'Ошибка заполнения',
-    })
-    @ApiOkResponse({ description: 'Пользователь успешно вошел в систему' })
-    @HttpCode(HttpStatus.OK)
-    @Public()
-    @Post('sign-in')
-    signIn(@Body() signInDto: SignInDto): Promise<{ accessToken: string }> {
-        return this.authService.signIn(signInDto);
-    }
-
-    @ApiOkResponse({ description: 'Пользователь успешно вышел из системы' })
-    @ApiUnauthorizedResponse({ description: 'Пользователь не авторизован' })
-    @ApiBearerAuth()
-    @HttpCode(HttpStatus.OK)
-    @Post('sign-out')
-    signOut(@CurrentUser('id') userId: string): Promise<void> {
-        return this.authService.signOut(userId);
     }
 
     @ApiUnauthorizedResponse({ description: 'Unauthorized' })

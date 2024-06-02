@@ -55,6 +55,19 @@ class Environment {
     @IsString()
     @IsNotEmpty()
     MYSQL_DATABASE: string;
+
+    @IsString()
+    @IsNotEmpty()
+    S3_HOST: string;
+    @IsNumber()
+    @IsNotEmpty()
+    S3_PORT: number;
+    @IsString()
+    @IsNotEmpty()
+    S3_USERNAME: string;
+    @IsString()
+    @IsNotEmpty()
+    S3_PASSWORD: string;
 }
 
 const validate = (config: Record<string, unknown>): Environment => {

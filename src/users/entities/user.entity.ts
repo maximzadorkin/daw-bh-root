@@ -9,7 +9,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { IsNotEmpty, MaxLength } from 'class-validator';
-import { ProjectUser } from '@app/project-user/entities/project-user.entity';
+import { ProjectUser } from '@app/project/entities/project-user.entity';
 
 @Entity({ name: 'users' })
 export class User {

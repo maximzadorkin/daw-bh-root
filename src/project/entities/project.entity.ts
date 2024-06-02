@@ -1,4 +1,3 @@
-import { ProjectUser } from '@app/project-user/entities/project-user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import {
@@ -9,6 +8,8 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
+import { ProjectUser } from './project-user.entity';
+import { Track } from './track';
 
 @Entity({ name: 'projects' })
 export class Project {
@@ -36,4 +37,9 @@ export class Project {
 
     @OneToMany(() => ProjectUser, (projectUser) => projectUser.project)
     projectUsers: ProjectUser[];
+
+    @ApiProperty({ description: 'Прикрепленные треки к проекту' })
+    @OneToMany(() => Track, (track) => track.project)
+    @IsNotEmpty()
+    tracks: Track[];
 }

@@ -4,14 +4,14 @@ import { Match } from '@__decorators__/match';
 import { Column } from 'typeorm';
 
 export class SignUpDto {
-    @ApiProperty({
-        description: 'Логин пользователя',
-        example: 'iAmACat',
-    })
+    @Column()
     @MaxLength(255)
     @IsNotEmpty()
-    readonly username: string;
-
+    @ApiProperty({
+        description: 'Имя пользователя',
+        example: 'Максим',
+    })
+    name: string;
     @ApiProperty({
         description: 'Пароль пользователя',
         example: '1234',
@@ -27,7 +27,6 @@ export class SignUpDto {
     })
     @IsNotEmpty()
     readonly password: string;
-
     @ApiProperty({
         description: 'Повторите то же значение, что и в поле пароль',
         example: '1234',
@@ -35,16 +34,6 @@ export class SignUpDto {
     @Match('password')
     @IsNotEmpty()
     readonly passwordConfirm: string;
-
-    @Column()
-    @MaxLength(255)
-    @IsNotEmpty()
-    @ApiProperty({
-        description: 'Имя пользователя',
-        example: 'Максим',
-    })
-    name: string;
-
     @Column()
     @MaxLength(255)
     @IsNotEmpty()
@@ -53,4 +42,11 @@ export class SignUpDto {
         example: 'Задоркин',
     })
     surname: string;
+    @ApiProperty({
+        description: 'Логин пользователя',
+        example: 'iAmACat',
+    })
+    @MaxLength(255)
+    @IsNotEmpty()
+    readonly username: string;
 }

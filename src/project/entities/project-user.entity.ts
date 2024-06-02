@@ -8,7 +8,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { User } from '@app/users/entities/user.entity';
-import { Project } from '@app/projects/entities/project.entity';
+import { Project } from './project.entity';
 
 export enum USER_PROJECT_ROLE {
     owner = 'owner',

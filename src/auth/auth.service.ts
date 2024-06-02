@@ -31,24 +31,59 @@ export class AuthService {
         private readonly redisService: RedisService,
     ) {}
 
-    async signUp(signUpDto: SignUpDto): Promise<void> {
-        const { username, password } = signUpDto;
+    public async changePassword(
+        userId: string,
+        changePasswordDto: ChangePasswordDto,
+    ): Promise<void> {
+        const { password, newPassword } = changePasswordDto;
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            throw new BadRequestException('Пользователя не существует');
+        }
+
+        const isCurrentPasswordMatch = await this.bcryptService.compare(
+            password,
+            user.password,
+        );
+        if (!isCurrentPasswordMatch) {
+            throw new BadRequestException('Неверный пароль');
+        }
 
         try {
             const user = new User();
-            user.username = username;
-            user.password = await this.bcryptService.hash(password);
-            user.name = signUpDto.name;
-            user.surname = signUpDto.surname;
+            user.id = userId;
+            user.password = await this.bcryptService.hash(newPassword);
             await this.userRepository.save(user);
         } catch (error) {
             if (error.code === MysqlErrorCode.UniqueViolation) {
-                throw new ConflictException(
-                    `Пользователь [${username}] уже существует`,
-                );
+                throw new ConflictException(`Что-то пошло не так`);
             }
             throw error;
         }
+    }
+
+    async generateAccessToken(
+        user: Partial<User>,
+    ): Promise<{ accessToken: string }> {
+        const tokenId = randomUUID();
+        await this.redisService.insert(`user-${user.id}`, tokenId);
+
+        const accessToken = await this.jwtService.signAsync(
+            {
+                id: user.id,
+                username: user.username,
+                tokenId,
+            } as CurrentUserData,
+            {
+                secret: this.jwtConfiguration.secret,
+                expiresIn: this.jwtConfiguration.accessTokenTtl,
+            },
+        );
+
+        return { accessToken };
     }
 
     async signIn(signInDto: SignInDto): Promise<{ accessToken: string }> {
@@ -83,56 +118,21 @@ export class AuthService {
         this.redisService.delete(`user-${userId}`);
     }
 
-    async generateAccessToken(
-        user: Partial<User>,
-    ): Promise<{ accessToken: string }> {
-        const tokenId = randomUUID();
-        await this.redisService.insert(`user-${user.id}`, tokenId);
-
-        const accessToken = await this.jwtService.signAsync(
-            {
-                id: user.id,
-                username: user.username,
-                tokenId,
-            } as CurrentUserData,
-            {
-                secret: this.jwtConfiguration.secret,
-                expiresIn: this.jwtConfiguration.accessTokenTtl,
-            },
-        );
-
-        return { accessToken };
-    }
-
-    public async changePassword(
-        userId: string,
-        changePasswordDto: ChangePasswordDto,
-    ): Promise<void> {
-        const { password, newPassword } = changePasswordDto;
-        const user = await this.userRepository.findOne({
-            where: { id: userId },
-        });
-
-        if (!user) {
-            throw new BadRequestException('Пользователя не существует');
-        }
-
-        const isCurrentPasswordMatch = await this.bcryptService.compare(
-            password,
-            user.password,
-        );
-        if (!isCurrentPasswordMatch) {
-            throw new BadRequestException('Неверный пароль');
-        }
+    async signUp(signUpDto: SignUpDto): Promise<void> {
+        const { username, password } = signUpDto;
 
         try {
             const user = new User();
-            user.id = userId;
-            user.password = await this.bcryptService.hash(newPassword);
+            user.username = username;
+            user.password = await this.bcryptService.hash(password);
+            user.name = signUpDto.name;
+            user.surname = signUpDto.surname;
             await this.userRepository.save(user);
         } catch (error) {
             if (error.code === MysqlErrorCode.UniqueViolation) {
-                throw new ConflictException(`Что-то пошло не так`);
+                throw new ConflictException(
+                    `Пользователь [${username}] уже существует`,
+                );
             }
             throw error;
         }

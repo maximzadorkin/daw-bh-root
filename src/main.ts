@@ -5,6 +5,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { TransformInterceptor } from './__interceptors__/transform.interceptor';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { setupSwagger } from './__docs__/swagger';
 
 const setupDevelopersApps = (app: NestExpressApplication): void => {
@@ -33,6 +34,8 @@ async function bootstrap() {
                 ? '*'
                 : process.env.CORS_ORIGIN,
     });
+
+    app.useWebSocketAdapter(new IoAdapter(app));
 
     setupDevelopersApps(app);
 

@@ -5,13 +5,6 @@ import { IsNotEmpty, Matches, MaxLength, MinLength } from 'class-validator';
 export class ChangePasswordDto {
     @ApiProperty({
         example: '1234',
-        description: 'Текущий пароль',
-    })
-    @IsNotEmpty()
-    readonly password: string;
-
-    @ApiProperty({
-        example: '1234',
         description: 'Новый пароль',
     })
     @IsNotEmpty()
@@ -25,7 +18,6 @@ export class ChangePasswordDto {
         message: 'Пароль слишком слабый',
     })
     readonly newPassword: string;
-
     @ApiProperty({
         example: '1234',
         description: 'Новый пароль',
@@ -33,4 +25,10 @@ export class ChangePasswordDto {
     @IsNotEmpty()
     @Match('newPassword', { message: 'Пароли не совпадают' })
     readonly newPasswordConfirm: string;
+    @ApiProperty({
+        example: '1234',
+        description: 'Текущий пароль',
+    })
+    @IsNotEmpty()
+    readonly password: string;
 }

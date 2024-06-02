@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsUUID } from 'class-validator';
-import { USER_PROJECT_ROLE } from '../entities/project-user.entity';
+import { USER_PROJECT_ROLE } from '@app/project/entities/project-user.entity';
 
 export class AddUserToProjectDto {
     @ApiProperty({ description: 'Проект, в который добавляем пользователя' })
